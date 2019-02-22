@@ -18,32 +18,60 @@ LinkedList *initList(void)
     return list;
 }
 
-void displayList(LinkedList *list)
+int displayList(LinkedList *list)
 {
-    Link *currentLink;
-    currentLink = list->first;
-
-    while (currentLink != NULL)
+    if (list == NULL)
     {
-        printf("%d -> ", currentLink->data);
-        currentLink = currentLink->followingLink;
+        exit(EXIT_FAILURE);
+    }
+    else if (list->nbLinks == 0)
+    {
+        printf("The list is empty\n");
+        return 0;
+    }
+    else
+    {
+        Link *currentLink;
+        currentLink = list->first;
+
+        while (currentLink != NULL)
+        {
+            printf("%d -> ", currentLink->data);
+            currentLink = currentLink->followingLink;
+        }
+
+        printf("\n\n");
     }
 
-    printf("\n\n");
+    return 1;
 }
 
-void displayReverseList(LinkedList *list)
+int displayReverseList(LinkedList *list)
 {
-    Link *currentLink;
-    currentLink = list->last;
-
-    while (currentLink != NULL)
+    if (list == NULL)
     {
-        printf("%d <- ", currentLink->data);
-        currentLink = currentLink->previousLink;
+        exit(EXIT_FAILURE);
+    }
+    else if (list->nbLinks == 0)
+    {
+        printf("The list is empty\n");
+        return 0;
+    }
+    else
+    {
+        Link *currentLink;
+        currentLink = list->last;
+
+        while (currentLink != NULL)
+        {
+            printf("%d <- ", currentLink->data);
+            currentLink = currentLink->previousLink;
+        }
+
+        printf("\n\n");
     }
 
-    printf("\n\n");
+    return 1;
 }
 
 void insertEnd(LinkedList *list, int data)
@@ -54,7 +82,7 @@ void insertEnd(LinkedList *list, int data)
 
     newLink = malloc(sizeof(newLink));
 
-    if (newLink == NULL)
+    if (list == NULL || newLink == NULL)
     {
         exit(EXIT_FAILURE);
     }
@@ -92,7 +120,7 @@ void insertStart(LinkedList *list, int data)
 
     newLink = malloc(sizeof(newLink));
 
-    if (newLink == NULL)
+    if (list == NULL || newLink == NULL)
     {
         exit(EXIT_FAILURE);
     }
@@ -124,7 +152,7 @@ int insertInd(LinkedList *list, int data, int ind)
 {
     if (ind < 0 || ind > (list->nbLinks)+1)
     {
-        printf("\nCan't insert at that index\n");
+        printf("You can't insert at that index\n");
         return 0;
     }
 
@@ -143,7 +171,7 @@ int insertInd(LinkedList *list, int data, int ind)
 
         newLink = malloc(sizeof(newLink));
 
-        if (newLink == NULL)
+        if (list == NULL || newLink == NULL)
         {
             exit(EXIT_FAILURE);
         }
@@ -190,20 +218,136 @@ int deleteEnd(LinkedList *list)
     else
     {
         Link *toDelete = list->last;
-        list->last->previousLink->followingLink = NULL;
-        list->last = list->last->previousLink;
+
+        if (list->nbLinks > 1)
+        {
+            list->last->previousLink->followingLink = NULL;
+            list->last = list->last->previousLink;
+        }
+        else
+        {
+            list->first = NULL;
+            list->last = NULL;
+        }
+
+        list->nbLinks--;
         free(toDelete);
     }
 
     return 1;
 }
 
+int deleteStart(LinkedList *list)
+{
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+    else if (list->nbLinks == 0)
+    {
+        printf("You can't delete anything from an empty list\n");
+        return 0;
+    }
+    else
+    {
+        Link *toDelete = list->first;
+
+        if (list->nbLinks > 1)
+        {
+            list->first->followingLink->previousLink = NULL;
+            list->first = list->first->followingLink;
+        }
+        else
+        {
+            list->first = NULL;
+            list->last = NULL;
+        }
+
+        list->nbLinks--;
+        free(toDelete);
+    }
+
+    return 1;
+}
+
+int deleteInd(LinkedList *list, int ind)
+{
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+    else if (list->nbLinks == 0)
+    {
+        printf("You can't delete anything from an empty list\n");
+        return 0;
+    }
+    else if (ind < 0 || ind >= list->nbLinks)
+    {
+        printf("\nYou can't delete at that index\n");
+        return 0;
+    }
+    else
+    {
+        if (ind == 0)
+        {
+            deleteStart(list);
+        }
+        else if (ind == (list->nbLinks)-1)
+        {
+            deleteEnd(list);
+        }
+        else
+        {
+            Link *toDelete = list->first;
+
+            for (int i=0; i<ind; i++)
+            {
+                toDelete = toDelete->followingLink;
+            }
+
+            toDelete->previousLink->followingLink = toDelete->followingLink;
+            toDelete->followingLink->previousLink = toDelete->previousLink;
+
+            list->nbLinks--;
+            free(toDelete);
+        }
+    }
+
+    return 1;
+}
+
+int deleteList(LinkedList *list)
+{
+    if (list == NULL)
+    {
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        Link *toDelete;
+        Link *nextDelete;
+        nextDelete = list->last;
+
+        while (nextDelete != NULL)
+        {
+            toDelete = nextDelete;
+            nextDelete = nextDelete->previousLink;
+            free(toDelete);
+        }
+        // free on a NULL pointer doesn't do anything (no need to free(nextDelete))
+
+        free(list);
+    }
+
+    return 1;
+}
+
+
 int main(void)
 {
     LinkedList *list;
     list = initList();
 
-    insertInd(list, 2, 2);
     insertEnd(list, 4);
     insertInd(list, 22, 2);
     insertStart(list, 1);
@@ -215,10 +359,10 @@ int main(void)
     displayList(list);
     displayReverseList(list);
 
-    deleteEnd(list);
-
+    deleteList(list);
     displayList(list);
-    displayReverseList(list);
+    insertEnd(list, 4);
+    displayList(list);
 
     return 0;
 }

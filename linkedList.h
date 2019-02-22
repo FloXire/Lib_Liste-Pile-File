@@ -16,11 +16,14 @@ typedef struct LinkedList_s
 } LinkedList;
 
 LinkedList *initList(void);
-void displayList(LinkedList *list);
-void displayReverseList(LinkedList *list);
+int displayList(LinkedList *list);
+int displayReverseList(LinkedList *list);
 void insertEnd(LinkedList *list, int data);
 void insertStart(LinkedList *list, int data);
 int insertInd(LinkedList *list, int data, int ind);
 int deleteEnd(LinkedList *list);
+int deleteStart(LinkedList *list);
+int deleteInd(LinkedList *list, int ind);
+int deleteList(LinkedList *list);
 
 #endif
